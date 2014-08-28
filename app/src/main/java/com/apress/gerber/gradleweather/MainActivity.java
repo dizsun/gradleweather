@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.Map;
 
 
 public class MainActivity extends ListActivity implements Runnable{
@@ -35,6 +36,12 @@ public class MainActivity extends ListActivity implements Runnable{
         AsyncTask.execute(this);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dismissSplashScreen();
+    }
+
     private void showSplashScreen() {
         splashDialog = new Dialog(this, R.style.splash_screen);
         splashDialog.setContentView(R.layout.activity_splash);
@@ -42,12 +49,7 @@ public class MainActivity extends ListActivity implements Runnable{
         splashDialog.show();
     }
 
-    private void onDataLoaded() {
-        ((TextView) findViewById(R.id.currentDayOfWeek)).setText(weekdays[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)+1]);
-        ((TextView) findViewById(R.id.currentTemperature)).setText(temperatureData.getCurrentConditions().get(TemperatureData.CURRENT));
-        ((TextView) findViewById(R.id.currentDewPoint)).setText(temperatureData.getCurrentConditions().get(TemperatureData.DEW_POINT));
-        ((TextView) findViewById(R.id.currentHigh)).setText(temperatureData.getCurrentConditions().get(TemperatureData.HIGH));
-        ((TextView) findViewById(R.id.currentLow)).setText(temperatureData.getCurrentConditions().get(TemperatureData.LOW));
+    private void dismissSplashScreen() {
         if (splashDialog!=null) {
             splashDialog.dismiss();
             splashDialog = null;
@@ -75,13 +77,26 @@ public class MainActivity extends ListActivity implements Runnable{
 
     @Override
     public void run() {
-        temperatureData = new TemperatureData(this);
+        temperatureData = new NationalWeatherRequestData();
         temperatureAdapter.setTemperatureData(temperatureData);
         // Set Runnable to remove splash screen just in case
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                onDataLoaded();
+                ((TextView) findViewById(R.id.currentDayOfWeek)).setText(weekdays[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)+1]);
+                Map<String, String> currentConditions = temperatureData.getCurrentConditions();
+                if (!currentConditions.isEmpty()) {
+                    ((TextView) findViewById(R.id.currentTemperature)).setText(currentConditions.get(ExampleTemperatureData.CURRENT));
+                    ((TextView) findViewById(R.id.currentDewPoint)).setText(currentConditions.get(ExampleTemperatureData.DEW_POINT));
+                    ((TextView) findViewById(R.id.currentHigh)).setText(currentConditions.get(ExampleTemperatureData.HIGH));
+                    ((TextView) findViewById(R.id.currentLow)).setText(currentConditions.get(ExampleTemperatureData.LOW));
+                } else {
+                    ((TextView) findViewById(R.id.currentTemperature)).setText("?");
+                    ((TextView) findViewById(R.id.currentDewPoint)).setText("?");
+                    ((TextView) findViewById(R.id.currentHigh)).setText("?");
+                    ((TextView) findViewById(R.id.currentLow)).setText("?");
+                }
+                dismissSplashScreen();
             }
         }, 5000);
     }
