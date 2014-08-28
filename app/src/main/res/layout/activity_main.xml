@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sunnyvale"
-            android:id="@+id/textView"
+            android:id="@+id/city"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
             android:layout_gravity="center_horizontal" />
 

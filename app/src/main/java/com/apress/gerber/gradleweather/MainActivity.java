@@ -77,12 +77,13 @@ public class MainActivity extends ListActivity implements Runnable{
 
     @Override
     public void run() {
-        temperatureData = new NationalWeatherRequestData();
-        temperatureAdapter.setTemperatureData(temperatureData);
+        temperatureData = new NationalWeatherRequestData(this);
         // Set Runnable to remove splash screen just in case
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                temperatureAdapter.setTemperatureData(temperatureData);
+                ((TextView) findViewById(R.id.city)).setText(temperatureData.getCity());
                 ((TextView) findViewById(R.id.currentDayOfWeek)).setText(weekdays[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)+1]);
                 Map<String, String> currentConditions = temperatureData.getCurrentConditions();
                 if (!currentConditions.isEmpty()) {

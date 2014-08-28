@@ -11,4 +11,6 @@ public interface TemperatureData {
     List<TemperatureItem> getTemperatureItems();
 
     Map<String, String> getCurrentConditions();
+
+    CharSequence getCity();
 }

@@ -69,4 +69,9 @@ public class ExampleTemperatureData implements TemperatureData {
         currentConditions.put(DEW_POINT,"56");
         return currentConditions;
     }
+
+    @Override
+    public CharSequence getCity() {
+        return "Sunnyvale";
+    }
 }

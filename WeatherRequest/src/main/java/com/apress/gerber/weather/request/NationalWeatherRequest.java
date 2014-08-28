@@ -1,5 +1,6 @@
 package com.apress.gerber.weather.request;
 
+import android.location.Location;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -16,12 +17,12 @@ import java.net.URL;
 public class NationalWeatherRequest {
 
     public static final String NATIONAL_WEATHER_SERVICE =
-            "http://forecast.weather.gov/MapClick.php?lat=37.368830&lon=-122.036350&FcstType=dwml";
+            "http://forecast.weather.gov/MapClick.php?lat=%f&lon=%f&FcstType=dwml";
 
-    public NationalWeatherRequest() {
+    public NationalWeatherRequest(Location location) {
         URL url;
         try {
-            url = new URL(NATIONAL_WEATHER_SERVICE);
+            url = new URL(String.format(NATIONAL_WEATHER_SERVICE, location.getLatitude(), location.getLongitude()));
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL for National Weather Service: " +
             NATIONAL_WEATHER_SERVICE);
