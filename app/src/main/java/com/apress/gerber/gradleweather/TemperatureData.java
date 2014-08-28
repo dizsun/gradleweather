@@ -46,7 +46,7 @@ public class TemperatureData {
                 "Mostly sunny, with a high near 82."));
         items.add(new TemperatureItem(drawable(R.drawable.night_part_clear), "Saturday Night", "Partly Cloudy",
                 "Partly cloudy, with a low around 59."));
-        items.add(new TemperatureItem(drawable(R.drawable.partly_cloudy), "Sunday", "Mostly Sunny",
+        items.add(new TemperatureItem(drawable(R.drawable.early_sunny), "Sunday", "Mostly Sunny",
                 "Mostly sunny, with a high near 82."));
         items.add(new TemperatureItem(drawable(R.drawable.day_part_cloudy), "Sunday night", "Mostly Clear",
                 "Mostly clear, with a low around 59."));
