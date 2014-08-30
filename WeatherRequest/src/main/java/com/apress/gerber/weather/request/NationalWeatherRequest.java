@@ -36,15 +36,17 @@ public class NationalWeatherRequest {
             return;
         }
         log("Dumping weather data...");
+        StringBuilder builder = new StringBuilder();
         BufferedReader weatherReader = new BufferedReader(new InputStreamReader(inputStream));
         try {
             for(String eachLine = weatherReader.readLine(); eachLine!=null; eachLine = weatherReader.readLine()) {
-                log(eachLine);
+                builder.append(eachLine);
             }
         } catch (IOException e) {
             log("Exception reading data from Nat'l weather site " + e);
             e.printStackTrace();
         }
+        log(builder.toString());
     }
 
     private int log(String eachLine) {

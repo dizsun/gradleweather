@@ -84,7 +84,7 @@ public class MainActivity extends ListActivity implements Runnable{
             public void run() {
                 temperatureAdapter.setTemperatureData(temperatureData);
                 ((TextView) findViewById(R.id.city)).setText(temperatureData.getCity());
-                ((TextView) findViewById(R.id.currentDayOfWeek)).setText(weekdays[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)+1]);
+                ((TextView) findViewById(R.id.currentDayOfWeek)).setText(weekdays[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]);
                 Map<String, String> currentConditions = temperatureData.getCurrentConditions();
                 if (!currentConditions.isEmpty()) {
                     ((TextView) findViewById(R.id.currentTemperature)).setText(currentConditions.get(ExampleTemperatureData.CURRENT));
