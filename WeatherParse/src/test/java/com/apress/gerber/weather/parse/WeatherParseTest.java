@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -52,21 +53,35 @@ public class WeatherParseTest extends TestCase {
         assertEquals("Should see the location in XML", weather.getLocation(), "Sunnyvale, CA");
     }
 
+    public void testCanSeeAvailableForcasts() {
+        Collection<String> availableForcasts = weather.getAvailableForcasts();
+        List<String> expectedEntries = asList("k-p12h-n13-1", "k-p24h-n6-2", "k-p1h-n1-1", "k-p24h-n7-1");
+        for(String each : availableForcasts) {
+            assertTrue(each + " should be in expected entries",expectedEntries.contains(each));
+        };
+    }
+
+    public void testCanFindLastForcast() {
+        assertEquals("The last forcast should be determined by the size of -nxx", "k-p12h-n13-1",
+                weather.lastForcast());
+    }
+
     public void testCanSeeForecast() {
-        List<Map<String, String>> weatherForecast = weather.getForecast();
+        List<Map<String, String>> weatherForecast = weather.getForecast("k-p12h-n13-1");
         int theSize = weatherForecast.size();
         assertTrue( "Should forcast for 13 days",theSize == 13 );
         assertForecasts(asList("Today", "Tonight", "Wednesday", "Wednesday Night", "Thursday"), "day");
         assertForecasts(asList("skc.png", "nskc.png", "few.png", "nbknfg.png", "sctfg.png"), "iconLink");
         assertForecasts(asList("Sunny", "Clear", "Sunny", "Patchy Fog", "Patchy Fog", "Mostly Clear"), "shortDescription");
+        assertForecasts(asList("Sunny, with a high near 81. North northwest wind 3 to 8 mph. "), "description");
     }
 
     public void assertForecasts(List list, String key) {
         for (int idx = 0; idx < list.size(); idx++) {
             String each = (String) list.get(idx);
-            String actual = weather.getForecast().get(idx).get(key);
-            assertTrue( "$idx Forecast should have key '$key'",null!=actual );
-            assertTrue( "${idx} Forecast should end with $each but was $actual",actual.endsWith(each) );
+            String actual = weather.getForecast("k-p12h-n13-1").get(idx).get(key);
+            assertTrue( idx + " Forecast should have key: " + key,null!=actual );
+            assertTrue( idx + " Forecast should end with " + each + " but was " + actual,actual.endsWith(each) );
         }
     }
 }

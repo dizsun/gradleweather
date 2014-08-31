@@ -18,8 +18,47 @@ public class NationalWeatherRequest {
 
     public static final String NATIONAL_WEATHER_SERVICE =
             "http://forecast.weather.gov/MapClick.php?lat=%f&lon=%f&FcstType=dwml";
+    private final URL url;
 
     public NationalWeatherRequest(Location location) {
+        url = createUrl(location);
+    }
+
+    public String getWeatherXml() {
+        InputStream inputStream = getInputStream(url);
+        return readWeatherXml(inputStream);
+    }
+
+    private String readWeatherXml(InputStream inputStream) {
+        StringBuilder builder = new StringBuilder();
+        if (inputStream!=null) {
+            log("Dumping weather data...");
+            BufferedReader weatherReader = new BufferedReader(new InputStreamReader(inputStream));
+            try {
+                for(String eachLine = weatherReader.readLine(); eachLine!=null; eachLine = weatherReader.readLine()) {
+                    builder.append(eachLine);
+                }
+            } catch (IOException e) {
+                log("Exception reading data from Nat'l weather site " + e);
+                e.printStackTrace();
+            }
+            log(builder.toString());
+        }
+        return builder.toString();
+    }
+
+    private InputStream getInputStream(URL url) {
+        InputStream inputStream = null;
+        try {
+            inputStream = url.openStream();
+        } catch (IOException e) {
+            log("Exception opening Nat'l weather URL " + e);
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+
+    private URL createUrl(Location location) {
         URL url;
         try {
             url = new URL(String.format(NATIONAL_WEATHER_SERVICE, location.getLatitude(), location.getLongitude()));
@@ -27,26 +66,7 @@ public class NationalWeatherRequest {
             throw new IllegalArgumentException("Invalid URL for National Weather Service: " +
             NATIONAL_WEATHER_SERVICE);
         }
-        InputStream inputStream;
-        try {
-            inputStream = url.openStream();
-        } catch (IOException e) {
-            log("Exception opening Nat'l weather URL " + e);
-            e.printStackTrace();
-            return;
-        }
-        log("Dumping weather data...");
-        StringBuilder builder = new StringBuilder();
-        BufferedReader weatherReader = new BufferedReader(new InputStreamReader(inputStream));
-        try {
-            for(String eachLine = weatherReader.readLine(); eachLine!=null; eachLine = weatherReader.readLine()) {
-                builder.append(eachLine);
-            }
-        } catch (IOException e) {
-            log("Exception reading data from Nat'l weather site " + e);
-            e.printStackTrace();
-        }
-        log(builder.toString());
+        return url;
     }
 
     private int log(String eachLine) {

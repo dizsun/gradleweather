@@ -3,20 +3,27 @@ package com.apress.gerber.weather.parse;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
+import static java.util.Arrays.asList;
 
 public class WeatherParser {
     XmlPullParser xpp;
     List<String> currentTag = new ArrayList();
     Map<String, String> currentAttributes;
     Map<String, String> currentConditions = new HashMap<String, String>();
-    List<Map<String, String>> forecast = new ArrayList<Map<String, String>>();
+    private List<Map<String, String>> forecast = new ArrayList<Map<String, String>>();
     String location = "?";
+    private String city;
 
     public WeatherParser() {
         XmlPullParserFactory factory;
@@ -41,7 +48,7 @@ public class WeatherParser {
         return all;
     }
 
-    private void addForecatValue(int index, String key, String value) {
+    private void addForecatValue(List<Map<String, String>> forecast, int index, String key, String value) {
         while(forecast.size()-1 < index)
             forecast.add(new HashMap<String, String>());
         forecast.get(index).put(key, value);
@@ -61,10 +68,10 @@ public class WeatherParser {
                 currentTag.add(tag);
                 if(tag.equals("temperature")) {
                     tempType = xpp.getAttributeValue(null, "type");
-                } else if(tag.equals("start-valid-time") && timeLayout.equals("k-p12h-n13-1")) {
-                    addForecatValue(forecastCount++, "day", currentAttributes.get("period-name"));
-                } else if(tag.equals("weather-conditions") && timeLayout.equals("k-p12h-n13-1")) {
-                    addForecatValue(forecastCount++, "shortDescription", currentAttributes.get("weather-summary"));
+                } else if(tag.equals("start-valid-time")) {
+                    addForecatValue(findForecast(timeLayout), forecastCount++, "day", currentAttributes.get("period-name"));
+                } else if(tag.equals("weather-conditions") ) {
+                    addForecatValue(findForecast(timeLayout), forecastCount++, "shortDescription", currentAttributes.get("weather-summary"));
                 } else if(tag.equals("conditions-icon") || tag.equals("weather")) {
                     timeLayout = currentAttributes.get("time-layout");
                 }
@@ -77,8 +84,10 @@ public class WeatherParser {
                     timeLayout = text;
                 } else if(closeTag.equals("time-layout") || closeTag.equals("conditions-icon") || closeTag.equals("weather")) {
                     forecastCount = 0;
-                } else if(closeTag.equals("icon-link") && timeLayout.equals("k-p12h-n13-1")) {
-                    addForecatValue(forecastCount++, "iconLink", text);
+                } else if(closeTag.equals("icon-link") ) {
+                    addForecatValue(findForecast(timeLayout), forecastCount++, "iconLink", text);
+                } else if(closeTag.equals("text") && currentTag.get(currentTag.size()-1).equals("wordedForecast") ) {
+                    addForecatValue(findForecast(timeLayout), forecastCount++, "description", text);
                 } else if(closeTag.equals("description") && currentTag.get(currentTag.size()-1).equals("location")) {
                     location = text;
                 }
@@ -89,6 +98,15 @@ public class WeatherParser {
         }
     }
 
+    Map<String, List> forecastByTimeLayout = new HashMap<String, List>();
+
+    public List<Map<String, String>> findForecast(String timeLayout) {
+        if(!forecastByTimeLayout.containsKey(timeLayout)) {
+            forecastByTimeLayout.put(timeLayout, new ArrayList<Map<String, String>>());
+        }
+        return forecastByTimeLayout.get(timeLayout);
+    }
+
     public String getLocation() {
         return location;
     }
@@ -97,8 +115,44 @@ public class WeatherParser {
         return currentConditions.get(key);
     }
 
-    public List<Map<String, String>> getForecast() {
-        return forecast;
+    public List<Map<String, String>> getForecast(String timeLayout) {
+        return forecastByTimeLayout.get(timeLayout);
+    }
+
+    public void setForecast(List<Map<String, String>> forecast) {
+        this.forecast = forecast;
+    }
+
+    public Collection<String> getAvailableForcasts() {
+        return forecastByTimeLayout.keySet();
+    }
+
+    final static Pattern pattern = Pattern.compile("k-p\\d+h-n(\\d+)-\\d+");
+    static {
+        for(String each : asList("k-p12h-n13-1", "k-p24h-n6-2", "k-p1h-n1-1", "k-p24h-n7-1")){
+            assert pattern.matcher(each)
+                    .matches();
+        }
+    }
+    public String lastForcast() {
+        int max = 0;
+        String last = null;
+        for (String eachKey : getAvailableForcasts()) {
+            Matcher matcher = pattern.matcher(eachKey);
+            matcher.matches();
+            int num = Integer.parseInt(matcher.group(1));
+            max = Math.max(num, max);
+            if(num==max) last = eachKey;
+        }
+        return last;
+    }
+
+    public List<Map<String, String>> getLastForecast() {
+        return getForecast(lastForcast());
+    }
+
+    public Map<String, String> getCurrentConditions() {
+        return currentConditions;
     }
 }
 
