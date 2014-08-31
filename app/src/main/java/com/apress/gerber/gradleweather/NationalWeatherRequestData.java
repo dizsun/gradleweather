@@ -13,7 +13,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +26,6 @@ public class NationalWeatherRequestData implements TemperatureData {
     public static final double DEFAULT_LONGITUDE = -122.036350;
     private final WeatherParser weatherParser;
     private final Context context;
-    private LocationManager locationManager;
-    private String city = "?";
 
     public NationalWeatherRequestData(Context context) {
         this.context = context;
@@ -77,7 +74,7 @@ public class NationalWeatherRequestData implements TemperatureData {
     }
 
     private Location getLocation(Context context) {
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String provider = locationManager.getBestProvider(criteria, false);
         Location location = locationManager.getLastKnownLocation(provider);

@@ -1,5 +1,9 @@
 package com.apress.gerber.weather.parse;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -10,20 +14,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import static java.util.Arrays.asList;
-
 public class WeatherParser {
     XmlPullParser xpp;
-    List<String> currentTag = new ArrayList();
+    List<String> currentTag = new ArrayList<String>();
     Map<String, String> currentAttributes;
     Map<String, String> currentConditions = new HashMap<String, String>();
-    private List<Map<String, String>> forecast = new ArrayList<Map<String, String>>();
     String location = "?";
-    private String city;
+    final static Pattern pattern = Pattern.compile("k-p\\d+h-n(\\d+)-\\d+");
 
     public WeatherParser() {
         XmlPullParserFactory factory;
@@ -104,7 +101,7 @@ public class WeatherParser {
         if(!forecastByTimeLayout.containsKey(timeLayout)) {
             forecastByTimeLayout.put(timeLayout, new ArrayList<Map<String, String>>());
         }
-        return forecastByTimeLayout.get(timeLayout);
+        return (List<Map<String, String>>)forecastByTimeLayout.get(timeLayout);
     }
 
     public String getLocation() {
@@ -119,30 +116,20 @@ public class WeatherParser {
         return forecastByTimeLayout.get(timeLayout);
     }
 
-    public void setForecast(List<Map<String, String>> forecast) {
-        this.forecast = forecast;
-    }
-
     public Collection<String> getAvailableForcasts() {
         return forecastByTimeLayout.keySet();
     }
 
-    final static Pattern pattern = Pattern.compile("k-p\\d+h-n(\\d+)-\\d+");
-    static {
-        for(String each : asList("k-p12h-n13-1", "k-p24h-n6-2", "k-p1h-n1-1", "k-p24h-n7-1")){
-            assert pattern.matcher(each)
-                    .matches();
-        }
-    }
     public String lastForcast() {
         int max = 0;
         String last = null;
         for (String eachKey : getAvailableForcasts()) {
             Matcher matcher = pattern.matcher(eachKey);
-            matcher.matches();
-            int num = Integer.parseInt(matcher.group(1));
-            max = Math.max(num, max);
-            if(num==max) last = eachKey;
+            if (matcher.matches()) {
+                int num = Integer.parseInt(matcher.group(1));
+                max = Math.max(num, max);
+                if(num==max) last = eachKey;
+            }
         }
         return last;
     }
