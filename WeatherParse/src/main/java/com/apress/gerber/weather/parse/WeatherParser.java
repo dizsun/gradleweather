@@ -37,20 +37,6 @@ public class WeatherParser {
         }
     }
 
-    private Map<String, String> attributes() {
-        Map<String, String> all = new HashMap<String, String>();
-        for(int i=0; i < xpp.getAttributeCount(); i++) {
-            all.put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
-        }
-        return all;
-    }
-
-    private void addForecatValue(List<Map<String, String>> forecast, int index, String key, String value) {
-        while(forecast.size()-1 < index)
-            forecast.add(new HashMap<String, String>());
-        forecast.get(index).put(key, value);
-    }
-
     public void parse(Reader xml) throws XmlPullParserException, IOException {
         xpp.setInput(xml);
         int eventType = xpp.getEventType();
@@ -140,6 +126,20 @@ public class WeatherParser {
 
     public Map<String, String> getCurrentConditions() {
         return currentConditions;
+    }
+
+    private Map<String, String> attributes() {
+        Map<String, String> all = new HashMap<String, String>();
+        for(int i=0; i < xpp.getAttributeCount(); i++) {
+            all.put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
+        }
+        return all;
+    }
+
+    private void addForecatValue(List<Map<String, String>> forecast, int index, String key, String value) {
+        while(forecast.size()-1 < index)
+            forecast.add(new HashMap<String, String>());
+        forecast.get(index).put(key, value);
     }
 }
 
