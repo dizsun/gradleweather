@@ -52,13 +52,16 @@ public class NationalWeatherRequestData implements TemperatureData {
     public List<TemperatureItem> getTemperatureItems() {
         ArrayList<TemperatureItem> temperatureItems = new ArrayList<TemperatureItem>();
         List<Map<String, String>> forecast = weatherParser.getLastForecast();
-        for(Map<String,String> eachEntry : forecast) {
-            temperatureItems.add(new TemperatureItem(
-                    context.getResources().getDrawable(R.drawable.sunny),
-                    eachEntry.get("day"),
-                    eachEntry.get("shortDescription"),
-                    eachEntry.get("description")
-                    ));
+        if (forecast!=null) {
+            for(Map<String,String> eachEntry : forecast) {
+                temperatureItems.add(new TemperatureItem(
+                        context.getResources().getDrawable(R.drawable.progress),
+                        eachEntry.get("iconLink"),
+                        eachEntry.get("day"),
+                        eachEntry.get("shortDescription"),
+                        eachEntry.get("description")
+                        ));
+            }
         }
         return temperatureItems;
     }

@@ -42,7 +42,9 @@ public class NationalWeatherRequest {
                 e.printStackTrace();
             }
         }
-        return builder.toString();
+        String weatherXml = builder.toString();
+        log("Weather data " + weatherXml);
+        return weatherXml;
     }
 
     private InputStream getInputStream(URL url) {
