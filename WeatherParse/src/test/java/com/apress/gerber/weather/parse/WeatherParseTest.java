@@ -23,7 +23,6 @@ import static java.util.Arrays.asList;
 public class WeatherParseTest extends TestCase {
 
     private WeatherParser weather;
-    private String givenXml;
 
     private String asString(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -37,7 +36,7 @@ public class WeatherParseTest extends TestCase {
     public void setUp() throws IOException, XmlPullParserException {
         URL weatherXml = getClass().getResource("/weather.xml");
         assertNotNull("Test requires weather.xml as a resource at the CP root.", weatherXml);
-        this.givenXml = asString(weatherXml.openStream());
+        String givenXml = asString(weatherXml.openStream());
         this.weather = new WeatherParser();
         weather.parse(new StringReader(givenXml.replaceAll("<br>", "<br/>")));
     }
@@ -53,23 +52,23 @@ public class WeatherParseTest extends TestCase {
         assertEquals("Should see the location in XML", weather.getLocation(), "Sunnyvale, CA");
     }
 
-    public void testCanSeeAvailableForcasts() {
-        Collection<String> availableForcasts = weather.getAvailableForecasts();
+    public void testCanSeeAvailableForecasts() {
+        Collection<String> availableForecasts = weather.getAvailableForecasts();
         List<String> expectedEntries = asList("k-p12h-n13-1", "k-p24h-n6-2", "k-p1h-n1-1", "k-p24h-n7-1");
-        for(String each : availableForcasts) {
+        for(String each : availableForecasts) {
             assertTrue(each + " should be in expected entries",expectedEntries.contains(each));
         };
     }
 
-    public void testCanFindLastForcast() {
-        assertEquals("The last forcast should be determined by the size of -nxx", "k-p12h-n13-1",
+    public void testCanFindLastForecast() {
+        assertEquals("The last forecast should be determined by the size of -nxx", "k-p12h-n13-1",
                 weather.lastForecast());
     }
 
     public void testCanSeeForecast() {
         List<Map<String, String>> weatherForecast = weather.getForecast("k-p12h-n13-1");
         int theSize = weatherForecast.size();
-        assertTrue( "Should forcast for 13 days",theSize == 13 );
+        assertTrue( "Should forecast for 13 days",theSize == 13 );
         assertForecasts(asList("Today", "Tonight", "Wednesday", "Wednesday Night", "Thursday"), "day");
         assertForecasts(asList("skc.png", "nskc.png", "few.png", "nbknfg.png", "sctfg.png"), "iconLink");
         assertForecasts(asList("Sunny", "Clear", "Sunny", "Patchy Fog", "Patchy Fog", "Mostly Clear"), "shortDescription");
