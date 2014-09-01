@@ -54,7 +54,7 @@ public class WeatherParseTest extends TestCase {
     }
 
     public void testCanSeeAvailableForcasts() {
-        Collection<String> availableForcasts = weather.getAvailableForcasts();
+        Collection<String> availableForcasts = weather.getAvailableForecasts();
         List<String> expectedEntries = asList("k-p12h-n13-1", "k-p24h-n6-2", "k-p1h-n1-1", "k-p24h-n7-1");
         for(String each : availableForcasts) {
             assertTrue(each + " should be in expected entries",expectedEntries.contains(each));
@@ -63,7 +63,7 @@ public class WeatherParseTest extends TestCase {
 
     public void testCanFindLastForcast() {
         assertEquals("The last forcast should be determined by the size of -nxx", "k-p12h-n13-1",
-                weather.lastForcast());
+                weather.lastForecast());
     }
 
     public void testCanSeeForecast() {

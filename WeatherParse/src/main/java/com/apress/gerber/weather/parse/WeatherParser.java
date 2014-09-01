@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WeatherParser {
+public class WeatherParser implements WeatherParseEventHandler.WeatherEventCallback {
     XmlPullParser xpp;
     List<String> currentTag = new ArrayList<String>();
     Map<String, String> currentAttributes;
@@ -38,44 +38,21 @@ public class WeatherParser {
     }
 
     public void parse(Reader xml) throws XmlPullParserException, IOException {
+        WeatherParseEventHandler eventHandler = new WeatherParseEventHandler(this);
         xpp.setInput(xml);
         int eventType = xpp.getEventType();
-        String text = null;
-        String tempType = null;
-        String timeLayout = null;
-        int forecastCount = 0;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if(eventType == XmlPullParser.START_TAG) {
                 String tag = xpp.getName();
                 currentAttributes = attributes();
                 currentTag.add(tag);
-                if(tag.equals("temperature")) {
-                    tempType = xpp.getAttributeValue(null, "type");
-                } else if(tag.equals("start-valid-time")) {
-                    addForecatValue(findForecast(timeLayout), forecastCount++, "day", currentAttributes.get("period-name"));
-                } else if(tag.equals("weather-conditions") ) {
-                    addForecatValue(findForecast(timeLayout), forecastCount++, "shortDescription", currentAttributes.get("weather-summary"));
-                } else if(tag.equals("conditions-icon") || tag.equals("weather")) {
-                    timeLayout = currentAttributes.get("time-layout");
-                }
+                eventHandler.onStartElement(tag, currentAttributes);
             } else if(eventType == XmlPullParser.END_TAG) {
                 String closeTag = currentTag.remove(currentTag.size() - 1);
-                if(closeTag.equals("value") && tempType!=null && currentTag.get(currentTag.size()-1).equals("temperature")) {
-                    currentConditions.put(tempType, text);
-                    tempType = null;
-                } else if(closeTag.equals("layout-key")) {
-                    timeLayout = text;
-                } else if(closeTag.equals("time-layout") || closeTag.equals("conditions-icon") || closeTag.equals("weather")) {
-                    forecastCount = 0;
-                } else if(closeTag.equals("icon-link") ) {
-                    addForecatValue(findForecast(timeLayout), forecastCount++, "iconLink", text);
-                } else if(closeTag.equals("text") && currentTag.get(currentTag.size()-1).equals("wordedForecast") ) {
-                    addForecatValue(findForecast(timeLayout), forecastCount++, "description", text);
-                } else if(closeTag.equals("description") && currentTag.get(currentTag.size()-1).equals("location")) {
-                    location = text;
-                }
+                String priorTag = currentTag.size() > 0 ? currentTag.get(currentTag.size() - 1) : "";
+                eventHandler.onEndElement(closeTag, priorTag);
             } else if(eventType == XmlPullParser.TEXT) {
-                text = xpp.getText();
+                eventHandler.onText(xpp.getText());
             }
             eventType = xpp.next();
         }
@@ -102,14 +79,14 @@ public class WeatherParser {
         return forecastByTimeLayout.get(timeLayout);
     }
 
-    public Collection<String> getAvailableForcasts() {
+    public Collection<String> getAvailableForecasts() {
         return forecastByTimeLayout.keySet();
     }
 
-    public String lastForcast() {
+    public String lastForecast() {
         int max = 0;
         String last = null;
-        for (String eachKey : getAvailableForcasts()) {
+        for (String eachKey : getAvailableForecasts()) {
             Matcher matcher = pattern.matcher(eachKey);
             if (matcher.matches()) {
                 int num = Integer.parseInt(matcher.group(1));
@@ -121,11 +98,26 @@ public class WeatherParser {
     }
 
     public List<Map<String, String>> getLastForecast() {
-        return getForecast(lastForcast());
+        return getForecast(lastForecast());
     }
 
     public Map<String, String> getCurrentConditions() {
         return currentConditions;
+    }
+
+    @Override
+    public void onCurrentCondition(String type, String condition) {
+        currentConditions.put(type, condition);
+    }
+
+    @Override
+    public void onForecastDetail(String timeLayout, int idx, String detailType, String value) {
+        addForecastValue(findForecast(timeLayout), idx, detailType, value);
+    }
+
+    @Override
+    public void onLocation(String location) {
+        this.location = location;
     }
 
     private Map<String, String> attributes() {
@@ -136,7 +128,7 @@ public class WeatherParser {
         return all;
     }
 
-    private void addForecatValue(List<Map<String, String>> forecast, int index, String key, String value) {
+    private void addForecastValue(List<Map<String, String>> forecast, int index, String key, String value) {
         while(forecast.size()-1 < index)
             forecast.add(new HashMap<String, String>());
         forecast.get(index).put(key, value);

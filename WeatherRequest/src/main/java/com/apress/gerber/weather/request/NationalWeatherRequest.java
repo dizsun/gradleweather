@@ -32,7 +32,6 @@ public class NationalWeatherRequest {
     private String readWeatherXml(InputStream inputStream) {
         StringBuilder builder = new StringBuilder();
         if (inputStream!=null) {
-            log("Dumping weather data...");
             BufferedReader weatherReader = new BufferedReader(new InputStreamReader(inputStream));
             try {
                 for(String eachLine = weatherReader.readLine(); eachLine!=null; eachLine = weatherReader.readLine()) {
@@ -42,7 +41,6 @@ public class NationalWeatherRequest {
                 log("Exception reading data from Nat'l weather site " + e);
                 e.printStackTrace();
             }
-            log(builder.toString());
         }
         return builder.toString();
     }
