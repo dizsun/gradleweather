@@ -9,6 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 import java.util.Calendar;
 import java.util.Map;
 
@@ -24,12 +27,18 @@ public class MainActivity extends ListActivity implements Runnable{
             "Wednesday","Thursday","Friday",
             "Saturday"
     };
+    private ImageLoader imageLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        temperatureAdapter = new TemperatureAdapter(this);
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration
+                .Builder(getApplicationContext())
+                .build();
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(config);
+        temperatureAdapter = new TemperatureAdapter(this,imageLoader);
         setListAdapter(temperatureAdapter);
         showSplashScreen();
         handler = new Handler();

@@ -15,6 +15,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -27,10 +30,12 @@ import java.util.List;
  */
 public class TemperatureAdapter extends BaseAdapter {
     private final Context context;
+    private final ImageLoader imageLoader;
     List<TemperatureItem>items;
 
-    public TemperatureAdapter(Context context) {
+    public TemperatureAdapter(Context context, ImageLoader imageLoader) {
         this.context = context;
+        this.imageLoader = imageLoader;
         this.items = new ArrayList<TemperatureItem>();
     }
 
@@ -77,42 +82,14 @@ public class TemperatureAdapter extends BaseAdapter {
         }
 
         public void setIconLink(String iconLink) {
-            if(this.iconLink != null && this.iconLink.equals(iconLink)) return;
-            else this.iconLink = iconLink;
-
-            if(asyncTask != null) {
-                asyncTask.cancel(true);
-            }
-            asyncTask = new AsyncTask<String,Integer,Bitmap>() {
+            final ImageView imageView = (ImageView) view.findViewById(R.id.imageIcon);
+            imageLoader.displayImage(iconLink, imageView, new SimpleImageLoadingListener(){
                 @Override
-                protected Bitmap doInBackground(String... url) {
-                    InputStream imageStream;
-                    try {
-                        imageStream = new URL(url[0]).openStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                    return BitmapFactory.decodeStream(imageStream);
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                    imageView.clearAnimation();
+                    super.onLoadingComplete(imageUri, view, loadedImage);
                 }
-
-                @Override
-                protected void onPostExecute(final Bitmap bitmap) {
-                    if (bitmap == null) {
-                        return;
-                    }
-                    new Handler(context.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ImageView imageView = (ImageView) view.findViewById(R.id.imageIcon);
-                            imageView.clearAnimation();
-                            imageView.setImageBitmap(bitmap);
-                        }
-                    });
-                    asyncTask = null;
-                }
-            };
-            asyncTask.execute(iconLink);
+            });
         }
     }
     private View createView(ViewGroup parent) {
