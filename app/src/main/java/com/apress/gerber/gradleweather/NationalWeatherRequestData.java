@@ -55,7 +55,7 @@ public class NationalWeatherRequestData implements TemperatureData {
         if (forecast!=null) {
             for(Map<String,String> eachEntry : forecast) {
                 temperatureItems.add(new TemperatureItem(
-                        context.getResources().getDrawable(R.drawable.progress),
+                        context.getResources().getDrawable(R.drawable.progress_small),
                         eachEntry.get("iconLink"),
                         eachEntry.get("day"),
                         eachEntry.get("shortDescription"),

@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="40dp"
         android:layout_marginTop="127dp"
-        android:src="@drawable/sunny" />
+        android:src="@drawable/gradleweather_logo" />
 
     <TextView
         android:layout_width="wrap_content"
