@@ -4,6 +4,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'kxml:kxml:2.2.2'
     testCompile 'junit:junit:4.11'
+    targetCompatibility='1.7'
+    sourceCompatibility='1.7'
 }
 
 sourceSets {
